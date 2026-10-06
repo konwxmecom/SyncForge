@@ -11,6 +11,7 @@ import "./style.css";
 
 const editorElement = document.querySelector<HTMLDivElement>("#editor");
 const documentHeading = document.querySelector<HTMLElement>("#document-heading");
+const workspaceDocumentTitle = document.querySelector<HTMLElement>("#workspace-document-title");
 const status = document.querySelector<HTMLElement>("#sync-status");
 const statusLabel = document.querySelector<HTMLElement>("#status-label");
 const editorHint = document.querySelector<HTMLElement>("#editor-hint");
@@ -21,7 +22,7 @@ const copyLink = document.querySelector<HTMLButtonElement>("#copy-link");
 const authTokenInput = document.querySelector<HTMLInputElement>("#auth-token");
 const connectButton = document.querySelector<HTMLButtonElement>("#connect");
 
-if (!editorElement || !documentHeading || !status || !statusLabel || !editorHint || !characterCount || !replicaLabel || !notice || !copyLink || !authTokenInput || !connectButton) {
+if (!editorElement || !documentHeading || !workspaceDocumentTitle || !status || !statusLabel || !editorHint || !characterCount || !replicaLabel || !notice || !copyLink || !authTokenInput || !connectButton) {
   throw new Error("Demo page is missing required editor elements");
 }
 
@@ -43,6 +44,7 @@ const socketProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 let client = createSyncClient();
 
 documentHeading.textContent = documentId;
+workspaceDocumentTitle.textContent = documentId;
 replicaLabel.textContent = replicaId.slice(0, 8);
 
 copyLink.addEventListener("click", async () => {

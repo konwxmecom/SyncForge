@@ -263,6 +263,7 @@ The benchmark is reproducible in its workload, not guaranteed to produce identic
 | 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | Complete |
 | 8 — Resource guardrails | Configurable process/document connection ceilings and per-connection message rate limit | Complete |
 | 9 — Operational basics | Graceful shutdown, health/readiness endpoints, low-cardinality metrics, and tested private backup archive script | Complete |
+| 10 — Project presentation | Branded responsive workspace, project-owned SVG identity/preview, professional README, corrected MIT license, and dependency notices | Complete |
 
 ## 9. Deliberately out of current project scope
 

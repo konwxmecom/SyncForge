@@ -3,60 +3,138 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101817" />
-    <title>SyncForge collaborative text demo</title>
+    <meta name="theme-color" content="#f5f6f4" />
+    <meta name="description" content="A small, self-hosted collaborative plain-text editor powered by SyncForge." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>SyncForge — Shared workspace</title>
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar">
-        <a class="brand" href="/" aria-label="SyncForge home">
-          <span class="brand-mark" aria-hidden="true">S</span>
-          <span>SyncForge</span>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Workspace sidebar">
+        <a class="brand" href="/" aria-label="SyncForge workspace">
+          <img src="/syncforge-mark.svg" alt="" width="34" height="34" />
+          <span>syncforge</span>
         </a>
-        <span class="eyebrow">REAL-TIME TEXT LAB</span>
-      </header>
 
-      <section class="intro">
-        <p class="eyebrow">ALPHA · TIPTAP PLAIN-TEXT COLLABORATION</p>
-        <h1>Write together,<br /><span>one character at a time.</span></h1>
-        <p class="lede">Open this document in another tab and watch edits converge through the local Go sync service.</p>
-      </section>
+        <div class="workspace-switcher">
+          <span class="workspace-avatar" aria-hidden="true">S</span>
+          <span class="workspace-name">
+            <strong>Personal workspace</strong>
+            <small>Self-hosted</small>
+          </span>
+          <span class="switcher-caret" aria-hidden="true">⌄</span>
+        </div>
 
-      <section class="workspace" aria-labelledby="document-heading">
-        <div class="document-bar">
-          <div>
-            <p class="eyebrow">SHARED DOCUMENT</p>
-            <h2 id="document-heading"></h2>
+        <p class="sidebar-label">WORKSPACE</p>
+        <nav class="sidebar-nav">
+          <a class="nav-item nav-item-active" href="#workspace" aria-current="page">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 4.5h13v11h-13zM6.5 8h7m-7 3h5" /></svg>
+            <span>Documents</span>
+            <span class="nav-count">1</span>
+          </a>
+          <a class="nav-item" href="https://github.com/konwxmecom/SyncForge" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><path d="M7 13c.7.6 1.7 1 3 1 1.8 0 3-1 3-2.2 0-1.3-1.1-1.8-3-2.1-1.5-.2-2.3-.7-2.3-1.6S8.5 6.5 10 6.5c1 0 1.9.3 2.5.8" /></svg>
+            <span>Project repository</span>
+            <span class="external-mark" aria-hidden="true">↗</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="local-card">
+            <span class="local-card-icon" aria-hidden="true">⌘</span>
+            <strong>Your data stays yours</strong>
+            <p>Edits are stored in this browser and sent to your SyncForge server.</p>
           </div>
-          <div class="document-actions">
-            <button id="copy-link" class="button button-secondary" type="button">Copy invite link</button>
-            <span id="sync-status" class="status" role="status" aria-live="polite">
-              <span class="status-dot"></span>
-              <span id="status-label">Starting…</span>
-            </span>
+          <div class="profile-row">
+            <span class="profile-avatar" aria-hidden="true">K</span>
+            <span><strong>Local workspace</strong><small>Browser session</small></span>
+            <span class="profile-menu" aria-hidden="true">···</span>
           </div>
         </div>
+      </aside>
 
-        <div class="access-controls">
-          <label for="auth-token">Room access token <span>(optional for local development)</span></label>
-          <input id="auth-token" type="password" autocomplete="off" spellcheck="false" />
-          <button id="connect" class="button button-secondary" type="button">Connect</button>
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="breadcrumbs">
+            <span>Workspace</span>
+            <span class="breadcrumb-separator" aria-hidden="true">/</span>
+            <span id="document-heading" class="breadcrumb-current"></span>
+          </div>
+          <div class="topbar-meta">
+            <span class="alpha-badge"><span></span> ALPHA</span>
+            <span class="topbar-divider" aria-hidden="true"></span>
+            <span class="replica-label">This tab <code id="replica-id"></code></span>
+          </div>
+        </header>
+
+        <div class="page-content">
+          <section class="page-heading" aria-labelledby="page-title">
+            <div>
+              <p class="eyebrow">SHARED DOCUMENT</p>
+              <h1 id="page-title">A quiet place to write.</h1>
+              <p class="page-description">A simple, shared text space. Invite someone and your edits meet here.</p>
+            </div>
+            <button id="copy-link" class="button button-primary" type="button">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 6.5V5.3A2.3 2.3 0 0 1 10.3 3h4.4A2.3 2.3 0 0 1 17 5.3v4.4a2.3 2.3 0 0 1-2.3 2.3h-1.2M11.7 8.3v6.4a2.3 2.3 0 0 1-2.3 2.3H5a2.3 2.3 0 0 1-2.3-2.3v-4.4A2.3 2.3 0 0 1 5 8h6.7Z" /></svg>
+              Copy invite link
+            </button>
+          </section>
+
+          <section class="summary-grid" aria-label="Document overview">
+            <article class="summary-card">
+              <span class="summary-icon summary-icon-green" aria-hidden="true">
+                <svg viewBox="0 0 20 20"><path d="M10 3.2 16 5v4.3c0 3.7-2.5 6.2-6 7.5-3.5-1.3-6-3.8-6-7.5V5l6-1.8Z" /><path d="m7.3 9.7 1.8 1.8 3.8-4" /></svg>
+              </span>
+              <span class="summary-copy"><small>Connection</small><strong id="sync-status" data-state="connecting"><span class="status-dot"></span><span id="status-label">Connecting</span></strong></span>
+            </article>
+            <article class="summary-card">
+              <span class="summary-icon summary-icon-blue" aria-hidden="true">
+                <svg viewBox="0 0 20 20"><path d="M5 3.5h10v13H5zM7.5 7h5m-5 3h5m-5 3h3" /></svg>
+              </span>
+              <span class="summary-copy"><small>Document</small><strong>Plain text</strong></span>
+            </article>
+            <article class="summary-card">
+              <span class="summary-icon summary-icon-amber" aria-hidden="true">
+                <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" /><path d="M10 6v4l2.7 1.7" /></svg>
+              </span>
+              <span class="summary-copy"><small>Character count</small><strong id="character-count">0 characters</strong></span>
+            </article>
+          </section>
+
+          <section id="workspace" class="editor-card" aria-label="Collaborative document editor">
+            <div class="editor-toolbar">
+              <div class="editor-title">
+                <span class="document-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20"><path d="M5 2.8h6l4 4v10.4H5zM11 2.8v4h4M7.5 10h5m-5 3h5" /></svg>
+                </span>
+                <div><strong id="workspace-document-title"></strong><small>Saved locally · syncs when connected</small></div>
+              </div>
+              <span class="toolbar-note"><span class="toolbar-note-dot"></span> Private room</span>
+            </div>
+
+            <div class="access-controls">
+              <label for="auth-token">Room access token</label>
+              <input id="auth-token" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your access token" />
+              <button id="connect" class="button button-secondary" type="button">Connect</button>
+              <p>Only people with a token granted for this room can join.</p>
+            </div>
+
+            <div id="editor" aria-label="Shared plain-text document"></div>
+
+            <div class="editor-footer">
+              <span id="editor-hint">Restoring local document…</span>
+              <span><span class="keyboard-hint">↵</span> Plain text only</span>
+            </div>
+          </section>
+
+          <footer class="page-footer">
+            <span>Made for focused writing. No accounts, tracking, or cloud lock-in.</span>
+            <a href="https://github.com/konwxmecom/SyncForge" target="_blank" rel="noreferrer">SyncForge by konwxmecom <span aria-hidden="true">↗</span></a>
+          </footer>
         </div>
-
-        <div id="editor" aria-label="Shared plain-text document"></div>
-
-        <div class="editor-footer">
-          <span id="editor-hint">Restoring local document…</span>
-          <span id="character-count">0 characters</span>
-        </div>
-      </section>
-
-      <footer class="footnote">
-        <span>Edits are stored in this browser and synced through the local server.</span>
-        <span class="replica-label">THIS TAB <code id="replica-id"></code></span>
-      </footer>
-      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-    </main>
+        <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

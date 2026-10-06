@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="720" y1="0" x2="720" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAF7"/>
+      <stop offset="1" stop-color="#F0F3EF"/>
+    </linearGradient>
+    <filter id="shadow" x="330" y="274" width="1044" height="600" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="12"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix values="0 0 0 0 .12 0 0 0 0 .17 0 0 0 0 .12 0 0 0 .08 0"/>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
+  <rect width="1440" height="960" rx="28" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1438" height="958" rx="27" stroke="#E6EBE5"/>
+  <rect x="32" y="32" width="255" height="896" rx="19" fill="#fff" stroke="#E7ECE7"/>
+  <rect x="54" y="55" width="38" height="38" rx="12" fill="#397A57"/>
+  <path d="M65 67h16M65 74h11M65 81h16" stroke="#F7FBF7" stroke-width="2.3" stroke-linecap="round"/>
+  <circle cx="80" cy="74" r="2.7" fill="#C5E4CB"/>
+  <text x="103" y="80" fill="#253129" font-family="Arial,sans-serif" font-size="22" font-weight="700">syncforge</text>
+  <rect x="52" y="122" width="215" height="62" rx="11" fill="#fff" stroke="#E7ECE7"/>
+  <rect x="64" y="136" width="34" height="34" rx="9" fill="#E4EFE5"/>
+  <text x="76" y="159" fill="#356848" font-family="Arial,sans-serif" font-size="15" font-weight="700">S</text>
+  <text x="107" y="149" fill="#313B35" font-family="Arial,sans-serif" font-size="12" font-weight="700">Personal workspace</text>
+  <text x="107" y="166" fill="#8A938D" font-family="Arial,sans-serif" font-size="11">Self-hosted</text>
+  <text x="61" y="220" fill="#98A19A" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">WORKSPACE</text>
+  <rect x="52" y="237" width="215" height="44" rx="9" fill="#E8F3EB"/>
+  <rect x="66" y="250" width="18" height="18" rx="2" stroke="#326B49" stroke-width="1.5"/>
+  <path d="M70 256h10M70 261h7" stroke="#326B49" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="95" y="264" fill="#326B49" font-family="Arial,sans-serif" font-size="12" font-weight="700">Documents</text>
+  <text x="246" y="264" fill="#8B968E" font-family="Arial,sans-serif" font-size="11">1</text>
+  <text x="59" y="898" fill="#87928A" font-family="Arial,sans-serif" font-size="10">Your data stays yours</text>
+  <text x="59" y="916" fill="#98A19A" font-family="Arial,sans-serif" font-size="9">Self-hosted · private by default</text>
+  <rect x="288" y="32" width="1120" height="58" rx="16" fill="#FFFFFF" fill-opacity=".7" stroke="#E7ECE7"/>
+  <text x="325" y="67" fill="#87928A" font-family="Arial,sans-serif" font-size="12">Workspace</text>
+  <text x="390" y="67" fill="#B4BCB5" font-family="Arial,sans-serif" font-size="12">/</text>
+  <text x="405" y="67" fill="#3C4740" font-family="Arial,sans-serif" font-size="12" font-weight="700">demo-room</text>
+  <rect x="1307" y="49" width="65" height="25" rx="13" fill="#FBFAF5" stroke="#E9E6D9"/>
+  <circle cx="1321" cy="61.5" r="3" fill="#CFAD69"/>
+  <text x="1330" y="65" fill="#8C7851" font-family="Arial,sans-serif" font-size="9" font-weight="700" letter-spacing="1">ALPHA</text>
+  <text x="325" y="152" fill="#8B958D" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="1.7">SHARED DOCUMENT</text>
+  <text x="325" y="202" fill="#27322B" font-family="Arial,sans-serif" font-size="40" font-weight="600" letter-spacing="-1.8">A quiet place to write.</text>
+  <text x="325" y="232" fill="#7D8880" font-family="Arial,sans-serif" font-size="14">A simple, shared text space. Invite someone and your edits meet here.</text>
+  <rect x="1204" y="177" width="168" height="42" rx="9" fill="#397A57"/>
+  <path d="M1224 191v-2a5 5 0 0 1 5-5h7M1236 196h-7a5 5 0 0 1-5-5v-2M1232 192l7-7M1235 185h4v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1248" y="203" fill="#fff" font-family="Arial,sans-serif" font-size="11" font-weight="700">Copy invite link</text>
+  <g>
+    <rect x="325" y="259" width="335" height="77" rx="11" fill="#fff" stroke="#E7ECE7"/>
+    <rect x="344" y="279" width="36" height="36" rx="10" fill="#EAF3EC"/>
+    <path d="m352 297 5 5 9-10" stroke="#4C865C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="393" y="289" fill="#8A948D" font-family="Arial,sans-serif" font-size="10">Connection</text>
+    <circle cx="399" cy="307" r="4" fill="#54A36C"/>
+    <text x="409" y="311" fill="#397A57" font-family="Arial,sans-serif" font-size="12" font-weight="700">Live and syncing</text>
+    <rect x="674" y="259" width="335" height="77" rx="11" fill="#fff" stroke="#E7ECE7"/>
+    <rect x="693" y="279" width="36" height="36" rx="10" fill="#EDF1F7"/>
+    <path d="M704 285h12l5 5v18h-17zM716 285v6h5M707 297h10m-10 5h10" stroke="#667DA3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="742" y="289" fill="#8A948D" font-family="Arial,sans-serif" font-size="10">Document</text>
+    <text x="742" y="311" fill="#344139" font-family="Arial,sans-serif" font-size="12" font-weight="700">Plain text</text>
+    <rect x="1023" y="259" width="349" height="77" rx="11" fill="#fff" stroke="#E7ECE7"/>
+    <rect x="1042" y="279" width="36" height="36" rx="10" fill="#F7F1E5"/>
+    <circle cx="1060" cy="297" r="10" stroke="#AD8B4F" stroke-width="1.5"/>
+    <path d="M1060 291v6l4 2" stroke="#AD8B4F" stroke-width="1.5" stroke-linecap="round"/>
+    <text x="1091" y="289" fill="#8A948D" font-family="Arial,sans-serif" font-size="10">Character count</text>
+    <text x="1091" y="311" fill="#344139" font-family="Arial,sans-serif" font-size="12" font-weight="700">1,248 characters</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="325" y="357" width="1047" height="479" rx="13" fill="#fff"/>
+    <rect x="325.5" y="357.5" width="1046" height="478" rx="12.5" stroke="#E4E9E4"/>
+  </g>
+  <path d="M326 425.5h1045" stroke="#EDF0ED"/>
+  <rect x="345" y="374" width="36" height="38" rx="9" fill="#FBFCFB" stroke="#E8ECE8"/>
+  <path d="M355 383h10l6 6v15h-16zM365 383v6h6M358 395h10m-10 4h10" stroke="#77857A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="392" y="392" fill="#364239" font-family="Arial,sans-serif" font-size="12" font-weight="700">demo-room</text>
+  <text x="392" y="408" fill="#929B94" font-family="Arial,sans-serif" font-size="10">Saved locally · syncs when connected</text>
+  <circle cx="1312" cy="390" r="3.5" fill="#6C9D75"/>
+  <text x="1322" y="394" fill="#7A867D" font-family="Arial,sans-serif" font-size="10" text-anchor="end">Private room</text>
+  <rect x="345" y="443" width="1007" height="66" fill="#FCFDFB"/>
+  <text x="362" y="468" fill="#647067" font-family="Arial,sans-serif" font-size="11" font-weight="700">Room access token</text>
+  <rect x="490" y="450" width="634" height="35" rx="7" fill="#fff" stroke="#E1E7E1"/>
+  <text x="504" y="472" fill="#A6AFA8" font-family="Arial,sans-serif" font-size="10">Paste your access token</text>
+  <rect x="1135" y="450" width="83" height="35" rx="7" fill="#fff" stroke="#DFE5DF"/>
+  <text x="1176" y="472" fill="#4B5950" font-family="Arial,sans-serif" font-size="10" font-weight="700" text-anchor="middle">Connect</text>
+  <text x="490" y="500" fill="#98A19A" font-family="Arial,sans-serif" font-size="9">Only people with a token granted for this room can join.</text>
+  <text x="366" y="556" fill="#4B554E" font-family="Arial,sans-serif" font-size="15">Welcome to your shared space.</text>
+  <text x="366" y="590" fill="#78837B" font-family="Arial,sans-serif" font-size="14">Write naturally. Changes sync between authorized tabs.</text>
+  <text x="366" y="624" fill="#78837B" font-family="Arial,sans-serif" font-size="14">When you are offline, your edits stay safely in this browser</text>
+  <text x="366" y="648" fill="#78837B" font-family="Arial,sans-serif" font-size="14">and queue until the connection returns.</text>
+  <path d="M326 797.5h1045" stroke="#EDF0ED"/>
+  <text x="346" y="818" fill="#8B958E" font-family="Arial,sans-serif" font-size="9">Plain-text editing · local-first storage</text>
+  <text x="1352" y="818" fill="#8B958E" font-family="Arial,sans-serif" font-size="9" text-anchor="end">↵  Plain text only</text>
+  <text x="325" y="883" fill="#98A19A" font-family="Arial,sans-serif" font-size="10">Made for focused writing. No accounts, tracking, or cloud lock-in.</text>
+  <text x="1370" y="883" fill="#748178" font-family="Arial,sans-serif" font-size="10" text-anchor="end">SyncForge by konwxmecom  ↗</text>
+</svg>

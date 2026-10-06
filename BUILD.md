@@ -252,6 +252,7 @@ The benchmark is reproducible in its workload, not guaranteed to produce identic
 | 4 — Offline recovery | IndexedDB queue, acknowledgement tracking, reconnect, replay | Complete |
 | 5 — Browser demo | TipTap plain-text binding, connection status, invite link, multi-tab flow | Complete |
 | 6 — Alpha hardening | Durable server history, optional room ACL, benchmark, alpha documentation | Complete |
+| 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | In progress |
 
 ## 9. What remains
 
@@ -260,7 +261,7 @@ The initial alpha roadmap is complete; the work below is **future product and pr
 ### Product capabilities
 
 - Rich-text or structured-document CRDT semantics and editor bindings beyond the TipTap plain-text bridge.
-- Presence, cursors, selections, awareness, and participant lists.
+- Selections, awareness, and participant-list UI beyond the implemented ephemeral cursor presence and peer-leave notifications.
 - Version history, document export/import, and user-facing conflict/recovery flows.
 - Account identities, token issuance/rotation/revocation, and per-user permissions.
 - React hooks and supported npm publication/versioning workflows.

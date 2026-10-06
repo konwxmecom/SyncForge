@@ -11,6 +11,7 @@ SyncForge is an alpha collaborative plain-text editing prototype built with a Ty
 - WebSocket room routing, protocol validation, bounded operation replay, and reconnect.
 - Per-document append-only server logs with periodic checkpoints and restart recovery.
 - Optional bearer-token authorization with explicit document allowlists.
+- Throttled ephemeral cursor presence with peer-leave notifications.
 - A TipTap plain-text binding, browser demo, and reproducible CRDT workload benchmark.
 
 ## Requirements
@@ -116,6 +117,6 @@ The benchmark reports its runtime environment and workload, then checks that two
 - Server logs are append-only, have no compaction, and need an external backup/restore process.
 - Per-document replay is capped at 10,000 operations or 32 MiB; there is no global disk, memory, connection, or request-rate quota.
 - Tokens are shared bearer credentials loaded at startup; there are no user identities, token lifecycle APIs, or operation attribution.
-- The TipTap binding and demo are plain text. Rich-text semantics, presence, version history, safe tombstone collection, and production operational guarantees are not implemented.
+- The TipTap binding and demo are plain text. Rich-text semantics, selections and participant lists, version history, safe tombstone collection, and production operational guarantees are not implemented.
 
 For the component-level description, protocol behavior, data durability details, and a more complete list of follow-up work, read [BUILD.md](./BUILD.md).

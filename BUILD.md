@@ -104,7 +104,7 @@ flowchart LR
     Core <--> Client[Sync client]
     Client <--> IndexedDB[(IndexedDB snapshots and pending queue)]
     Client <-->|WebSocket v1| Hub[Go room hub]
-    Hub <--> ACL[Optional token and document ACL]
+    Hub <--> ACL[Required token and document ACL]
     Hub <--> Log[(Per-document append-only log and checkpoints)]
     Hub --> Peer[Other clients in the document room]
 ```
@@ -251,7 +251,7 @@ The benchmark is reproducible in its workload, not guaranteed to produce identic
 | 3 — Sync service | Versioned protocol, Go WebSocket rooms, validation, operation routing | Complete |
 | 4 — Offline recovery | IndexedDB queue, acknowledgement tracking, reconnect, replay | Complete |
 | 5 — Browser demo | TipTap plain-text binding, connection status, invite link, multi-tab flow | Complete |
-| 6 — Alpha hardening | Durable server history, optional room ACL, benchmark, alpha documentation | Complete |
+| 6 — Alpha hardening | Durable server history, required room ACL, benchmark, alpha documentation | Complete |
 | 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | In progress |
 
 ## 9. What remains

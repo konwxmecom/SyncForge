@@ -10,7 +10,7 @@ SyncForge is an alpha collaborative plain-text editing prototype built with a Ty
 - Browser IndexedDB snapshots and a pending-operation queue for offline edits.
 - WebSocket room routing, protocol validation, bounded operation replay, and reconnect.
 - Per-document append-only server logs with periodic checkpoints and restart recovery.
-- Optional bearer-token authorization with explicit document allowlists.
+- Required bearer-token authorization with explicit document allowlists.
 - Throttled ephemeral cursor presence with peer-leave notifications.
 - A TipTap plain-text binding, browser demo, and reproducible CRDT workload benchmark.
 

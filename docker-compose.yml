@@ -1,0 +1,40 @@
+services:
+  syncforge-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      ADDR: ":8080"
+      DATA_DIR: "/data"
+      AUTH_FILE: "/run/secrets/syncforge_auth.json"
+    volumes:
+      - ./data:/data
+      - ./auth.example.json:/run/secrets/syncforge_auth.json:ro
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  syncforge-demo:
+    build:
+      context: .
+      dockerfile: apps/demo/Dockerfile
+    environment:
+      VITE_SYNC_PROXY_URL: "ws://syncforge-server:8080"
+    depends_on:
+      syncforge-server:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

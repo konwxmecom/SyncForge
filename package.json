@@ -1,0 +1,31 @@
+{
+  "name": "syncforge",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:protocol": "tsc -p packages/protocol-ts/tsconfig.json",
+    "build:core": "tsc -p packages/core/tsconfig.json",
+    "build:sync-client": "tsc -p packages/sync-client/tsconfig.json",
+    "build:tiptap": "npm run build:core && tsc -p packages/tiptap/tsconfig.json",
+    "build:demo": "npm run build:core && npm run build:protocol && npm run build:sync-client && npm run build:tiptap && vite build apps/demo --config apps/demo/vite.config.mjs",
+    "dev:demo": "npm run build:core && npm run build:protocol && npm run build:sync-client && npm run build:tiptap && vite apps/demo --config apps/demo/vite.config.mjs",
+    "typecheck:demo": "tsc -p apps/demo/tsconfig.json",
+    "test:protocol-ts": "npm run build:protocol && node --test packages/protocol-ts/test/*.test.mjs",
+    "test:core": "npm run build:core && node --test packages/core/test/*.test.mjs",
+    "test:sync-client": "npm run build:core && npm run build:protocol && npm run build:sync-client && node --test packages/sync-client/test/*.test.mjs",
+    "test:tiptap": "npm run build:core && npm run build:tiptap && node --test packages/tiptap/test/*.test.mjs",
+    "test:demo": "npm run build:core && npm run typecheck:demo && node --test apps/demo/test/*.test.mjs",
+    "test:go": "cd server && go test ./...",
+    "test": "npm run test:protocol-ts && npm run test:core && npm run test:sync-client && npm run test:tiptap && npm run test:demo && npm run test:go",
+    "benchmark:core": "npm run build:core && node scripts/benchmark-core.mjs",
+    "dev:server": "cd server && go run ./cmd/syncforge"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.3"
+  }
+}

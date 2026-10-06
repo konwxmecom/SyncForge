@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SyncForge protocol v1 message",
+  "description": "Versioned room and operation messages for the initial synchronization service.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "type": { "const": "join" },
+        "documentId": { "$ref": "#/$defs/identifier" },
+        "replicaId": { "$ref": "#/$defs/identifier" }
+      },
+      "required": ["protocolVersion", "type", "documentId", "replicaId"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "type": { "const": "operation" },
+        "documentId": { "$ref": "#/$defs/identifier" },
+        "replicaId": { "$ref": "#/$defs/identifier" },
+        "operationId": { "$ref": "#/$defs/operationId" },
+        "operation": { "$ref": "#/$defs/operation" }
+      },
+      "required": ["protocolVersion", "type", "documentId", "replicaId", "operationId", "operation"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "type": { "const": "ack" },
+        "documentId": { "$ref": "#/$defs/identifier" },
+        "operationId": { "$ref": "#/$defs/operationId" }
+      },
+      "required": ["protocolVersion", "type", "documentId", "operationId"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "type": { "const": "joined" },
+        "documentId": { "$ref": "#/$defs/identifier" }
+      },
+      "required": ["protocolVersion", "type", "documentId"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocolVersion": { "const": 1 },
+        "type": { "const": "error" },
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      },
+      "required": ["protocolVersion", "type", "code", "message"],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,512}$"
+    },
+    "elementId": {
+      "type": "object",
+      "properties": {
+        "replicaId": { "$ref": "#/$defs/identifier" },
+        "counter": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["replicaId", "counter"],
+      "additionalProperties": false
+    },
+    "operation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "insert" },
+            "id": { "$ref": "#/$defs/elementId" },
+            "after": {
+              "oneOf": [{ "$ref": "#/$defs/elementId" }, { "type": "null" }]
+            },
+            "value": { "type": "string", "minLength": 1, "maxLength": 1 }
+          },
+          "required": ["kind", "id", "after", "value"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "delete" },
+            "id": { "$ref": "#/$defs/elementId" }
+          },
+          "required": ["kind", "id"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

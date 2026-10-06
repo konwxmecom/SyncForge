@@ -1,0 +1,372 @@
+:root {
+  font-family: "Segoe UI", sans-serif;
+  color: #e8efea;
+  background: #101817;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --surface: #182321;
+  --muted: #94a59d;
+  --mint: #a8f0c6;
+  --line: rgba(212, 235, 222, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 74% 18%, rgba(50, 101, 76, 0.16), transparent 36rem),
+    #101817;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  width: min(100% - 48px, 1080px);
+  margin: 0 auto;
+  padding: 28px 0 24px;
+}
+
+.topbar,
+.brand,
+.document-bar,
+.document-actions,
+.editor-footer,
+.footnote {
+  display: flex;
+  align-items: center;
+}
+
+.topbar,
+.document-bar,
+.footnote {
+  justify-content: space-between;
+}
+
+.topbar {
+  min-height: 48px;
+}
+
+.brand {
+  gap: 10px;
+  color: #ecf5ef;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--mint);
+  color: #122019;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #8da198;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.intro {
+  max-width: 620px;
+  margin: 88px 0 44px;
+}
+
+.intro h1 {
+  margin: 15px 0 18px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: clamp(42px, 7vw, 70px);
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.99;
+}
+
+.intro h1 span {
+  color: var(--mint);
+}
+
+.lede {
+  max-width: 500px;
+  margin: 0;
+  color: #a4b2ab;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.workspace {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(24, 35, 33, 0.94);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.2);
+}
+
+.document-bar {
+  min-height: 88px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.document-bar h2 {
+  margin: 6px 0 0;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.document-actions {
+  gap: 20px;
+}
+
+.button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.button-secondary {
+  border-color: rgba(207, 232, 216, 0.18);
+  background: transparent;
+  color: #d8e7dc;
+}
+
+.button-secondary:hover {
+  border-color: rgba(207, 232, 216, 0.4);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.access-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.access-controls label {
+  color: #d8e7dc;
+  font-size: 12px;
+}
+
+.access-controls label span {
+  color: var(--muted);
+}
+
+.access-controls input {
+  min-width: 0;
+  width: min(100%, 360px);
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(207, 232, 216, 0.18);
+  border-radius: 8px;
+  background: #101817;
+  color: #e8efea;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #b8c7bd;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d1a565;
+  box-shadow: 0 0 0 3px rgba(209, 165, 101, 0.1);
+}
+
+.status[data-state="connected"] .status-dot {
+  background: #77e4a7;
+  box-shadow: 0 0 0 3px rgba(119, 228, 167, 0.12);
+}
+
+.status[data-state="offline"] .status-dot,
+.status[data-state="closed"] .status-dot {
+  background: #e18476;
+  box-shadow: 0 0 0 3px rgba(225, 132, 118, 0.12);
+}
+
+.status[data-state="connecting"] .status-dot,
+.status[data-state="reconnecting"] .status-dot {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+#editor {
+  display: block;
+  width: 100%;
+  min-height: 340px;
+  background: transparent;
+  color: #e4eee7;
+  font-family: ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  tab-size: 2;
+}
+
+#editor .ProseMirror {
+  min-height: 340px;
+  padding: 26px 28px;
+  outline: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#editor .ProseMirror p {
+  margin: 0;
+}
+
+#editor .ProseMirror[contenteditable="false"] {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.editor-footer {
+  min-height: 43px;
+  justify-content: space-between;
+  padding: 0 22px;
+  border-top: 1px solid var(--line);
+  color: #7f9288;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.footnote {
+  gap: 18px;
+  margin-top: 17px;
+  color: #71837a;
+  font-size: 11px;
+}
+
+.replica-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.replica-label code {
+  color: #99b8a3;
+  font-family: ui-monospace, monospace;
+}
+
+.notice {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 13px 16px;
+  border: 1px solid rgba(221, 176, 119, 0.27);
+  border-radius: 9px;
+  background: #28251d;
+  color: #f1dbbc;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 10px 38px rgba(0, 0, 0, 0.3);
+}
+
+.sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@media (max-width: 680px) {
+  .shell {
+    width: min(100% - 32px, 1080px);
+    padding-top: 19px;
+  }
+
+  .intro {
+    margin: 62px 0 31px;
+  }
+
+  .intro h1 {
+    font-size: clamp(39px, 11vw, 58px);
+  }
+
+  .document-bar {
+    align-items: flex-start;
+    gap: 16px;
+    flex-direction: column;
+    padding: 17px;
+  }
+
+  .document-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .access-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .button {
+    padding: 0 10px;
+  }
+
+  #editor {
+    min-height: 290px;
+    padding: 19px 17px;
+  }
+
+  .editor-footer {
+    padding: 0 15px;
+  }
+
+  .footnote {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

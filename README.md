@@ -29,10 +29,19 @@ npm install
 npm test
 ```
 
+Create a local authorization file and restrict its permissions:
+
+```sh
+cp auth.example.json auth.local.json
+chmod 600 auth.local.json
+```
+
+Replace the example token in `auth.local.json` with a randomly generated secret of at least 32 characters. This file is ignored by Git.
+
 In one terminal, start the Go service:
 
 ```sh
-npm run dev:server
+AUTH_FILE=./auth.local.json npm run dev:server
 ```
 
 In another terminal, start the browser demo:
@@ -41,7 +50,7 @@ In another terminal, start the browser demo:
 npm run dev:demo
 ```
 
-Open `http://localhost:5173/?doc=demo-room` in two browser tabs. Use the same `doc` value in each tab to join the same room. The local development server permits unauthenticated access when `AUTH_FILE` is unset; **do not expose that configuration to untrusted networks**.
+Open `http://localhost:5173/?doc=demo-room` in two browser tabs. Enter the configured token in both tabs and select **Connect**. The server refuses to start unless a valid `AUTH_FILE` is configured, and its default listener is loopback-only.
 
 Build the static demo with:
 
@@ -55,10 +64,13 @@ A containerized local stack is available for a quick smoke test without the loca
 
 ```sh
 cp .env.example .env
+cp auth.example.json auth.local.json
+chmod 600 auth.local.json
+# Replace the example token in auth.local.json with a random secret.
 docker compose up --build
 ```
 
-Then open `http://localhost:5173/?doc=demo-room` in a browser. The demo uses Vite's proxy to route `/sync` traffic to the Go service on port `8080`. For a custom host, set `VITE_SYNC_PROXY_URL` before starting the stack.
+Then open `http://localhost:5173/?doc=demo-room` in a browser and enter the configured token. The demo uses Vite's proxy to route `/sync` traffic to the Go service on port `8080`. Both published ports bind to loopback only; for a custom host, set `VITE_SYNC_PROXY_URL` before starting the stack.
 
 The local stack includes health checks for both services and waits for the sync server to become healthy before starting the demo. For a real deployment, place a TLS-terminating reverse proxy in front of the demo and keep the Go service on an internal network or private port.
 
@@ -76,15 +88,15 @@ For detailed deployment notes, see [docs/reverse-proxy.md](docs/reverse-proxy.md
 
 ## Server configuration
 
-The server listens on `:8080` by default. Configure it with environment variables:
+The server listens on `127.0.0.1:8080` by default. Configure it with environment variables:
 
 | Variable | Default | Description |
 |---|---|---|
-| `ADDR` | `:8080` | HTTP and WebSocket listen address |
+| `ADDR` | `127.0.0.1:8080` | HTTP and WebSocket listen address; use a private interface behind a TLS-terminating proxy for deployments |
 | `DATA_DIR` | `./data` | Owner-only directory for durable logs and checkpoints |
-| `AUTH_FILE` | unset | Optional owner-only JSON file containing token-to-document grants |
+| `AUTH_FILE` | required | Owner-only JSON file containing token-to-document grants; the server refuses to start without it |
 
-When authorization is enabled, a principal has this shape:
+A principal in the required authorization file has this shape:
 
 ```json
 {

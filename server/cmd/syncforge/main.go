@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/konwxmecom/SyncForge/server/internal/access"
@@ -14,7 +16,12 @@ import (
 func main() {
 	address := os.Getenv("ADDR")
 	if address == "" {
-		address = ":8080"
+		address = "127.0.0.1:8080"
+	}
+
+	authorizer, err := loadAuthorizer(os.Getenv("AUTH_FILE"))
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	dataDirectory := os.Getenv("DATA_DIR")
@@ -24,16 +31,6 @@ func main() {
 	store, err := oplog.Open(dataDirectory)
 	if err != nil {
 		log.Fatal(err)
-	}
-	var authorizer access.Authorizer
-	if authFile := os.Getenv("AUTH_FILE"); authFile != "" {
-		authorizer, err = access.Load(authFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("Document authorization enabled using %s", authFile)
-	} else {
-		log.Printf("WARNING: AUTH_FILE is unset; all document rooms are publicly accessible")
 	}
 
 	server := &http.Server{
@@ -46,4 +43,11 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
+}
+
+func loadAuthorizer(authFile string) (access.Authorizer, error) {
+	if strings.TrimSpace(authFile) == "" {
+		return nil, errors.New("AUTH_FILE is required; refusing to start without document authorization")
+	}
+	return access.Load(authFile)
 }

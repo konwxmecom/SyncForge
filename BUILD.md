@@ -58,11 +58,11 @@ The store restricts its data directory to owner-only permissions. A torn, unterm
 
 The built-in store is local filesystem persistence for one process and one machine. It is not a replicated database, transactional multi-host store, backup service, or log-retention system.
 
-### 2.5 Optional room authorization
+### 2.5 Required room authorization
 
 `server/internal/access` loads an owner-only JSON authorization file at startup. Each principal has a bearer token and an explicit list of document IDs it may join. The server stores token hashes in memory and uses constant-time comparison for token hash checks. Authorization is enforced at join time; document IDs are never treated as secrets.
 
-If `AUTH_FILE` is unset, room access is public for local development and the server emits a warning. Tokens are shared credentials, not user accounts. The demo's password input keeps the token out of invite URLs and sends it in the join message. Restart the service after changing the authorization file.
+`AUTH_FILE` is required; the server refuses to start if it is unset or invalid. Tokens are shared credentials, not user accounts. The demo's password input keeps the token out of invite URLs and sends it in the join message. Restart the service after changing the authorization file.
 
 ### 2.6 Browser demo and benchmark
 
@@ -154,7 +154,7 @@ The Go module is under `server/`; Go downloads its declared dependency when Go c
 Start the server in terminal 1:
 
 ```sh
-npm run dev:server
+AUTH_FILE=./auth.local.json npm run dev:server
 ```
 
 Start Vite in terminal 2:
@@ -163,7 +163,7 @@ Start Vite in terminal 2:
 npm run dev:demo
 ```
 
-Open `http://localhost:5173/?doc=demo-room` in two tabs. To use an authenticated room, create an owner-only config file, set `AUTH_FILE` and `DATA_DIR` before starting the server, enter the configured token into both tabs, and select **Connect**. Do not place tokens in URLs or commit authorization files.
+Create `auth.local.json` from `auth.example.json`, replace the example token with a random secret, and restrict the file with `chmod 600 auth.local.json`; then open `http://localhost:5173/?doc=demo-room` in two tabs, enter the configured token in both tabs, and select **Connect**. Do not place tokens in URLs or commit authorization files.
 
 Example authorization config (replace the placeholder with a newly generated random secret):
 
@@ -192,9 +192,9 @@ Vite writes generated output under `apps/demo/dist/`. That output is a build art
 
 | Environment variable | Default | Purpose |
 |---|---|---|
-| `ADDR` | `:8080` | Go HTTP and WebSocket listener |
+| `ADDR` | `127.0.0.1:8080` | Go HTTP and WebSocket listener |
 | `DATA_DIR` | `./data` | Owner-only durable operation log directory |
-| `AUTH_FILE` | unset | Optional owner-only token-to-document allowlist |
+| `AUTH_FILE` | required | Owner-only token-to-document allowlist; startup fails if unset |
 
 Useful endpoints and limits:
 
@@ -208,7 +208,7 @@ Useful endpoints and limits:
 
 Back up `DATA_DIR` with a consistent procedure, preferably with the service stopped. There is no automated backup or restore command. The history is append-only and checkpoints do not currently reduce disk use. A damaged complete record prevents the affected document from restoring; preserve a backup before attempting manual repair.
 
-For any network-facing environment, require authentication, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. This repository does not provide TLS, rate limiting, global connection quotas, monitoring, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
+The server binds to loopback by default, and the Docker stack publishes its ports on loopback only. For any network-facing environment, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. This repository does not provide TLS, rate limiting, global connection quotas, monitoring, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
 
 ## 7. Tests and benchmark commands
 

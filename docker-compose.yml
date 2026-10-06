@@ -4,14 +4,14 @@ services:
       context: .
       dockerfile: server/Dockerfile
     environment:
-      ADDR: ":8080"
+      ADDR: "0.0.0.0:8080"
       DATA_DIR: "/data"
       AUTH_FILE: "/run/secrets/syncforge_auth.json"
     volumes:
       - ./data:/data
-      - ./auth.example.json:/run/secrets/syncforge_auth.json:ro
+      - ${AUTH_FILE:-./auth.local.json}:/run/secrets/syncforge_auth.json:ro
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/healthz"]
       interval: 10s
@@ -30,7 +30,7 @@ services:
       syncforge-server:
         condition: service_healthy
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5173"]
       interval: 10s

@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/konwxmecom/SyncForge/server/internal/access"
@@ -40,16 +43,41 @@ func main() {
 		log.Fatal(err)
 	}
 
+	handler := httpserver.NewDurableHandlerWithLimits(store, authorizer, limits)
 	server := &http.Server{
 		Addr:              address,
-		Handler:           httpserver.NewDurableHandlerWithLimits(store, authorizer, limits),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-	log.Printf("SyncForge sync server listening on %s (connections=%d, connections-per-document=%d, messages-per-minute=%d)",
-		address, limits.MaxConnections, limits.MaxConnectionsPerDocument, limits.MaxMessagesPerMinute)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	serverErrors := make(chan error, 1)
+	go func() {
+		log.Printf("SyncForge sync server listening on %s (connections=%d, connections-per-document=%d, messages-per-minute=%d)",
+			address, limits.MaxConnections, limits.MaxConnectionsPerDocument, limits.MaxMessagesPerMinute)
+		serverErrors <- server.ListenAndServe()
+	}()
+
+	select {
+	case err := <-serverErrors:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	case <-ctx.Done():
+		shutdownContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownContext); err != nil {
+			log.Printf("Graceful server shutdown failed: %v", err)
+			if closeErr := server.Close(); closeErr != nil {
+				log.Printf("Force closing server failed: %v", closeErr)
+			}
+		}
+		handler.CloseWebSockets()
+		if err := <-serverErrors; err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("Server stopped with error: %v", err)
+		}
 	}
 }
 

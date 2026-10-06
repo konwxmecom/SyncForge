@@ -58,6 +58,8 @@ The store restricts its data directory to owner-only permissions. A torn, unterm
 
 The built-in store is local filesystem persistence for one process and one machine. It is not a replicated database, transactional multi-host store, backup service, or log-retention system.
 
+For backups, stop the service and run `scripts/backup-data.sh DATA_DIR BACKUP_ARCHIVE`. It creates an owner-only archive via an atomic rename and prevents writing the archive inside the source data directory. Restore only trusted archives into a new owner-only directory while the service is stopped, verify the restored service before removing the previous data directory, and keep off-host copies. This workflow is manual; scheduled backups and automated restore drills are not included.
+
 ### 2.5 Required room authorization
 
 `server/internal/access` loads an owner-only JSON authorization file at startup. Each principal has a bearer token and an explicit list of document IDs it may join. The server stores token hashes in memory and uses constant-time comparison for token hash checks. Authorization is enforced at join time; document IDs are never treated as secrets.
@@ -128,6 +130,7 @@ protocol/
   v1/                   Version 1 schema
 scripts/
   benchmark-core.mjs    Reproducible in-process CRDT benchmark
+  backup-data.sh        Private archive for stopped-service backups
 server/
   cmd/syncforge/        Go service entry point and environment configuration
   internal/access/      Token/document authorization configuration
@@ -202,6 +205,8 @@ Vite writes generated output under `apps/demo/dist/`. That output is a build art
 Useful endpoints and limits:
 
 - `GET /healthz` returns process health (`{"status":"ok"}`); it is not a storage-readiness or end-to-end health check.
+- `GET /readyz` confirms startup configuration was accepted; it does not probe every document log.
+- `GET /metrics` exposes connection and loaded-room gauges without document or credential labels. Keep it on a private network.
 - `GET /sync` upgrades to the WebSocket protocol.
 - WebSocket frame maximum: 64 KiB.
 - Initial join timeout: 10 seconds.
@@ -209,9 +214,9 @@ Useful endpoints and limits:
 - Per-document retained history: 10,000 operations and 32 MiB of serialized replay payload.
 - Checkpoint interval: every 100 accepted operations.
 
-Back up `DATA_DIR` with a consistent procedure, preferably with the service stopped. There is no automated backup or restore command. The history is append-only and checkpoints do not currently reduce disk use. A damaged complete record prevents the affected document from restoring; preserve a backup before attempting manual repair.
+Back up `DATA_DIR` with `scripts/backup-data.sh`, preferably with the service stopped, and follow the restore procedure above. There are no scheduled backups or automated restore drills. The history is append-only and checkpoints do not currently reduce disk use. A damaged complete record prevents the affected document from restoring; preserve a backup before attempting manual repair.
 
-The server binds to loopback by default, and the Docker stack publishes its ports on loopback only. Connection and per-connection message ceilings are configurable safety limits, not tested capacity claims. For any network-facing environment, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. This repository does not provide global disk/memory quotas, IP-based join rate limiting, monitoring, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
+The server handles SIGINT/SIGTERM by stopping HTTP accepts and closing joined WebSocket peers. The server binds to loopback by default, and the Docker stack publishes its ports on loopback only. Connection and per-connection message ceilings are configurable safety limits, not capacity guarantees. For any network-facing environment, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. The repository provides basic low-cardinality metrics but not alerting, global disk/memory quotas, IP-based join rate limiting, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
 
 ## 7. Tests and benchmark commands
 
@@ -240,7 +245,7 @@ Run the benchmark from the repository root:
 npm run benchmark:core
 ```
 
-The npm `test` command runs TypeScript protocol tests, CRDT tests, sync-client tests, TipTap binding tests, demo typechecking/diff tests, and Go tests. The TipTap suite includes an actual editor instance under a lightweight DOM, covering typing, Enter, multiline paste, remote updates, and cursor preservation. Go's race detector is an additional check and is not part of the default npm test script.
+The npm `test` command runs TypeScript protocol tests, CRDT tests, sync-client tests, TipTap binding tests, demo typechecking/diff tests, operational backup-script tests, and Go tests. The TipTap suite includes an actual editor instance under a lightweight DOM, covering typing, Enter, multiline paste, remote updates, and cursor preservation. Go's race detector is an additional check and is not part of the default npm test script.
 
 The benchmark is reproducible in its workload, not guaranteed to produce identical timing. Results should always be reported with the output environment and workload fields. Do not interpret a single run as a performance guarantee.
 
@@ -255,12 +260,13 @@ The benchmark is reproducible in its workload, not guaranteed to produce identic
 | 4 — Offline recovery | IndexedDB queue, acknowledgement tracking, reconnect, replay | Complete |
 | 5 — Browser demo | TipTap plain-text binding, connection status, invite link, multi-tab flow | Complete |
 | 6 — Alpha hardening | Durable server history, required room ACL, benchmark, alpha documentation | Complete |
-| 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | In progress |
-| 8 — Resource guardrails | Configurable process/document connection ceilings and per-connection message rate limit | In progress |
+| 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | Complete |
+| 8 — Resource guardrails | Configurable process/document connection ceilings and per-connection message rate limit | Complete |
+| 9 — Operational basics | Graceful shutdown, health/readiness endpoints, low-cardinality metrics, and tested private backup archive script | Complete |
 
-## 9. What remains
+## 9. Deliberately out of current project scope
 
-The initial alpha roadmap is complete; the work below is **future product and production engineering**, not unfinished Phase 0–6 checklist items:
+The SyncForge **plain-text collaborative alpha scope is complete** when the Phase 0–9 checks pass. The items below are future product/platform work, not unfinished alpha checklist items:
 
 ### Product capabilities
 
@@ -281,7 +287,7 @@ The initial alpha roadmap is complete; the work below is **future product and pr
 
 ### Production operations
 
-- Automated backups, restore drills, observability, metrics, alerting, and documented incident procedures.
+- Scheduled backups, automated restore drills, alerting, and documented incident procedures. Manual private archives and basic private-network metrics are included.
 - TLS deployment guidance and integration tests for a hardened reverse-proxy setup.
 - A threat model, security review, credential lifecycle, and deployment-specific access-control policy.
 - Billing, hosted-service operations, and commercial licensing after the product and business model are validated.

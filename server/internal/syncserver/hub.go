@@ -47,6 +47,12 @@ type Limits struct {
 	MaxMessagesPerMinute      int
 }
 
+type Stats struct {
+	ActiveConnections int
+	ActiveRooms       int
+	RoomConnections   int
+}
+
 func DefaultLimits() Limits {
 	return Limits{
 		MaxConnectionsPerDocument: defaultMaxRoomClients,
@@ -112,6 +118,33 @@ func NewHubWithLimits(store operationStore, authorizer access.Authorizer, limits
 		store:      store,
 		authorizer: authorizer,
 		limits:     limits,
+	}
+}
+
+func (hub *Hub) Stats() Stats {
+	hub.mu.RLock()
+	defer hub.mu.RUnlock()
+	stats := Stats{
+		ActiveConnections: hub.activeConnections,
+		ActiveRooms:       len(hub.rooms),
+	}
+	for _, documentRoom := range hub.rooms {
+		stats.RoomConnections += len(documentRoom.peers)
+	}
+	return stats
+}
+
+func (hub *Hub) CloseConnections() {
+	hub.mu.RLock()
+	peers := make([]*peer, 0, hub.activeConnections)
+	for _, documentRoom := range hub.rooms {
+		for client := range documentRoom.peers {
+			peers = append(peers, client)
+		}
+	}
+	hub.mu.RUnlock()
+	for _, client := range peers {
+		client.stop()
 	}
 }
 

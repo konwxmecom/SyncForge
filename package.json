@@ -18,8 +18,9 @@
     "test:sync-client": "npm run build:core && npm run build:protocol && npm run build:sync-client && node --test packages/sync-client/test/*.test.mjs",
     "test:tiptap": "npm run build:core && npm run build:tiptap && node --test packages/tiptap/test/*.test.mjs",
     "test:demo": "npm run build:core && npm run typecheck:demo && node --test apps/demo/test/*.test.mjs",
+    "test:ops": "node --test scripts/test/*.test.mjs",
     "test:go": "cd server && go test ./...",
-    "test": "npm run test:protocol-ts && npm run test:core && npm run test:sync-client && npm run test:tiptap && npm run test:demo && npm run test:go",
+    "test": "npm run test:protocol-ts && npm run test:core && npm run test:sync-client && npm run test:tiptap && npm run test:demo && npm run test:ops && npm run test:go",
     "benchmark:core": "npm run build:core && node scripts/benchmark-core.mjs",
     "dev:server": "cd server && go run ./cmd/syncforge"
   },

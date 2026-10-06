@@ -19,6 +19,7 @@ The important parts are:
 - proxy `/` to the browser demo
 - proxy `/sync` to the sync server with WebSocket upgrade headers
 - keep the raw Go service off public internet
+- do not route `/metrics` publicly; expose it only to a trusted monitoring network
 - ensure `AUTH_FILE` and `DATA_DIR` are protected on the host
 
 ## Important security notes
@@ -37,5 +38,6 @@ The important parts are:
 4. Keep logs and durable data in a protected location.
 5. Run the app with explicit `AUTH_FILE` and `DATA_DIR` values.
 6. Validate the `/sync` route with WebSocket handshakes before launch.
+7. Configure off-host backups and periodically test restores into a separate data directory.
 
 This does not replace a full security review or a hardened deployment process, but it is the next practical step beyond local development.

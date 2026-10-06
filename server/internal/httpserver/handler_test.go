@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,15 +17,68 @@ import (
 )
 
 func TestHealthEndpoint(t *testing.T) {
-	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
-	recorder := httptest.NewRecorder()
-	NewHandler().ServeHTTP(recorder, request)
+	handler := NewHandler()
+	for _, path := range []string{"/healthz", "/readyz"} {
+		t.Run(path, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, path, nil)
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, request)
 
-	if recorder.Code != http.StatusOK {
-		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+			if recorder.Code != http.StatusOK {
+				t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+			}
+			if got, want := recorder.Body.String(), "{\"status\":\"ok\"}\n"; got != want {
+				t.Fatalf("body = %q, want %q", got, want)
+			}
+		})
 	}
-	if got, want := recorder.Body.String(), "{\"status\":\"ok\"}\n"; got != want {
-		t.Fatalf("body = %q, want %q", got, want)
+}
+
+func TestMetricsReportConnectionAndRoomGauges(t *testing.T) {
+	handler := NewHandler()
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	connection := connectAndJoin(t, "ws"+server.URL[len("http"):]+"/sync", "metrics-room", "replica-a")
+	defer connection.Close()
+
+	response, err := http.Get(server.URL + "/metrics")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	raw, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("metrics status = %d, body = %q", response.StatusCode, raw)
+	}
+	for _, metric := range []string{
+		"syncforge_active_connections 1",
+		"syncforge_room_connections 1",
+		"syncforge_active_rooms 1",
+	} {
+		if !strings.Contains(string(raw), metric) {
+			t.Errorf("metrics body does not contain %q: %s", metric, raw)
+		}
+	}
+}
+
+func TestHandlerClosesWebSocketsOnShutdown(t *testing.T) {
+	handler := NewHandler()
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	connection := connectAndJoin(t, "ws"+server.URL[len("http"):]+"/sync", "shutdown-room", "replica-a")
+	defer connection.Close()
+
+	handler.CloseWebSockets()
+	if err := connection.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := connection.ReadMessage(); err == nil {
+		t.Fatal("websocket remained open after handler shutdown")
 	}
 }
 

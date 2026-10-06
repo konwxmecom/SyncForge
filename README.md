@@ -1,8 +1,8 @@
 # SyncForge
 
-SyncForge is an alpha collaborative plain-text editing prototype built with a TypeScript sequence CRDT and a Go WebSocket synchronization service. It includes browser-local offline persistence, reconnect and replay, durable server operation history, optional document-level token access, and a two-tab demo.
+SyncForge is an alpha collaborative plain-text editing prototype built with a TypeScript sequence CRDT and a Go WebSocket synchronization service. It includes browser-local offline persistence, reconnect and replay, durable server operation history, required document-level token access, and a two-tab demo.
 
-> **Status:** The original six-phase alpha roadmap is complete. SyncForge is a working prototype, not a production-ready collaborative editing service. See [BUILD.md](./BUILD.md) for the architecture, implementation details, operating instructions, verification steps, and remaining work.
+> **Status:** The plain-text collaborative alpha scope is complete. SyncForge is a working prototype, not a production-ready collaborative editing service. See [BUILD.md](./BUILD.md) for architecture, operating instructions, verification, and future-scope boundaries.
 
 ## Features
 
@@ -12,6 +12,7 @@ SyncForge is an alpha collaborative plain-text editing prototype built with a Ty
 - Per-document append-only server logs with periodic checkpoints and restart recovery.
 - Required bearer-token authorization with explicit document allowlists.
 - Throttled ephemeral cursor presence with peer-leave notifications.
+- Loopback-first service defaults, connection/message limits, basic metrics, and private data backup tooling.
 - A TipTap plain-text binding, browser demo, and reproducible CRDT workload benchmark.
 
 ## Requirements
@@ -74,6 +75,25 @@ Then open `http://localhost:5173/?doc=demo-room` in a browser and enter the conf
 
 The local stack includes health checks for both services and waits for the sync server to become healthy before starting the demo. For a real deployment, place a TLS-terminating reverse proxy in front of the demo and keep the Go service on an internal network or private port.
 
+## Back up and restore data
+
+Stop the sync server before making a backup (press Ctrl-C for local development, or run `docker compose stop syncforge-server`). Then create a private archive outside the data directory:
+
+```sh
+scripts/backup-data.sh ./data ./backups/syncforge-$(date -u +%Y%m%dT%H%M%SZ).tar.gz
+```
+
+The script writes the archive atomically with owner-only permissions and refuses destinations inside `DATA_DIR` or symbolic links. Store a copy off the machine. To restore a trusted archive, keep the server stopped, extract it into a new owner-only directory, inspect the contents, and point `DATA_DIR` at that directory:
+
+```sh
+mkdir -m 700 ./restore-data
+tar -tzf ./backups/syncforge-backup.tar.gz
+tar -xzf ./backups/syncforge-backup.tar.gz -C ./restore-data
+DATA_DIR=./restore-data AUTH_FILE=./auth.local.json npm run dev:server
+```
+
+Never extract an untrusted archive into a service data directory. Keep the previous data directory until the restored service has been verified.
+
 ## Reverse proxy and TLS guidance
 
 A simple nginx example is included in [deploy/nginx.conf.example](deploy/nginx.conf.example). The pattern is:
@@ -98,6 +118,8 @@ The server listens on `127.0.0.1:8080` by default. Configure it with environment
 | `MAX_CONNECTIONS` | `256` | Maximum simultaneous WebSocket connections per process |
 | `MAX_CONNECTIONS_PER_DOCUMENT` | `32` | Maximum simultaneous connections to one document |
 | `MAX_MESSAGES_PER_MINUTE` | `600` | Maximum inbound messages per connection per minute |
+
+`GET /healthz` is a liveness response, `GET /readyz` indicates that startup configuration was accepted, and `GET /metrics` exposes low-cardinality Prometheus gauges for active connections and rooms. These endpoints have no authentication; keep the service on loopback/private networking and do not publish `/metrics` through a public reverse proxy.
 
 A principal in the required authorization file has this shape:
 
@@ -134,4 +156,4 @@ The benchmark reports its runtime environment and workload, then checks that two
 - Tokens are shared bearer credentials loaded at startup; there are no user identities, token lifecycle APIs, or operation attribution.
 - The TipTap binding and demo are plain text. Rich-text semantics, selections and participant lists, version history, safe tombstone collection, and production operational guarantees are not implemented.
 
-For the component-level description, protocol behavior, data durability details, and a more complete list of follow-up work, read [BUILD.md](./BUILD.md).
+SyncForge's plain-text collaborative alpha implementation is complete, but the service is not production-ready. Rich text, identity management, distributed storage, automated operations, and other platform features remain future scope. For component details and boundaries, read [BUILD.md](./BUILD.md).

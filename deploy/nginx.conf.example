@@ -1,0 +1,60 @@
+user nginx;
+worker_processes auto;
+
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+  sendfile on;
+  keepalive_timeout 65;
+
+  upstream syncforge_demo {
+    server 127.0.0.1:5173;
+  }
+
+  upstream syncforge_server {
+    server 127.0.0.1:8080;
+  }
+
+  server {
+    listen 80;
+    server_name syncforge.example.com;
+    return 301 https://$host$request_uri;
+  }
+
+  server {
+    listen 443 ssl http2;
+    server_name syncforge.example.com;
+
+    ssl_certificate /etc/letsencrypt/live/syncforge.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/syncforge.example.com/privkey.pem;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+      proxy_pass http://syncforge_demo;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location /sync {
+      proxy_pass http://syncforge_server;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_read_timeout 600s;
+      proxy_send_timeout 600s;
+    }
+  }
+}

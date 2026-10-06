@@ -1,0 +1,6 @@
+{
+  "protocolVersion": 1,
+  "type": "join",
+  "documentId": "demo-doc",
+  "replicaId": "browser-tab-a"
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101817" />
+    <title>SyncForge collaborative text demo</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="SyncForge home">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span>SyncForge</span>
+        </a>
+        <span class="eyebrow">REAL-TIME TEXT LAB</span>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">ALPHA · TIPTAP PLAIN-TEXT COLLABORATION</p>
+        <h1>Write together,<br /><span>one character at a time.</span></h1>
+        <p class="lede">Open this document in another tab and watch edits converge through the local Go sync service.</p>
+      </section>
+
+      <section class="workspace" aria-labelledby="document-heading">
+        <div class="document-bar">
+          <div>
+            <p class="eyebrow">SHARED DOCUMENT</p>
+            <h2 id="document-heading"></h2>
+          </div>
+          <div class="document-actions">
+            <button id="copy-link" class="button button-secondary" type="button">Copy invite link</button>
+            <span id="sync-status" class="status" role="status" aria-live="polite">
+              <span class="status-dot"></span>
+              <span id="status-label">Starting…</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="access-controls">
+          <label for="auth-token">Room access token <span>(optional for local development)</span></label>
+          <input id="auth-token" type="password" autocomplete="off" spellcheck="false" />
+          <button id="connect" class="button button-secondary" type="button">Connect</button>
+        </div>
+
+        <div id="editor" aria-label="Shared plain-text document"></div>
+
+        <div class="editor-footer">
+          <span id="editor-hint">Restoring local document…</span>
+          <span id="character-count">0 characters</span>
+        </div>
+      </section>
+
+      <footer class="footnote">
+        <span>Edits are stored in this browser and synced through the local server.</span>
+        <span class="replica-label">THIS TAB <code id="replica-id"></code></span>
+      </footer>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

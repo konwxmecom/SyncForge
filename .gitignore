@@ -1,0 +1,6 @@
+node_modules/
+**/dist/
+.env
+auth.local.json
+.DS_Store
+my.docx

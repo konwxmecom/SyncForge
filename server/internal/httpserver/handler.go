@@ -14,7 +14,11 @@ func NewHandler() http.Handler {
 }
 
 func NewDurableHandler(store *oplog.Store, authorizer access.Authorizer) http.Handler {
-	return newHandler(syncserver.NewHubWithServices(store, authorizer))
+	return NewDurableHandlerWithLimits(store, authorizer, syncserver.DefaultLimits())
+}
+
+func NewDurableHandlerWithLimits(store *oplog.Store, authorizer access.Authorizer, limits syncserver.Limits) http.Handler {
+	return newHandler(syncserver.NewHubWithLimits(store, authorizer, limits))
 }
 
 func newHandler(hub *syncserver.Hub) http.Handler {

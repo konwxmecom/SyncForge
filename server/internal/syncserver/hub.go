@@ -20,27 +20,48 @@ import (
 )
 
 var (
-	errHistoryLimit      = errors.New("document operation history limit reached")
-	errOperationConflict = errors.New("operation ID was reused with different content")
-	errStorageFailure    = errors.New("durable operation log failure")
+	errHistoryLimit        = errors.New("document operation history limit reached")
+	errOperationConflict   = errors.New("operation ID was reused with different content")
+	errStorageFailure      = errors.New("durable operation log failure")
+	errRoomConnectionLimit = errors.New("document connection limit reached")
 )
 
 const (
-	maxMessageBytes = 64 << 10
-	joinTimeout     = 10 * time.Second
-	writeWait       = 10 * time.Second
-	pongWait        = 60 * time.Second
-	pingInterval    = (pongWait * 9) / 10
-	outboundBuffer  = 32
-	maxRoomHistory  = 10_000
-	maxHistoryBytes = 32 << 20
+	maxMessageBytes       = 64 << 10
+	joinTimeout           = 10 * time.Second
+	writeWait             = 10 * time.Second
+	pongWait              = 60 * time.Second
+	pingInterval          = (pongWait * 9) / 10
+	outboundBuffer        = 32
+	maxRoomHistory        = 10_000
+	maxHistoryBytes       = 32 << 20
+	inboundMessageWindow  = time.Minute
+	defaultMaxConnections = 256
+	defaultMaxRoomClients = 32
+	defaultMessagesMinute = 600
 )
 
+type Limits struct {
+	MaxConnectionsPerDocument int
+	MaxConnections            int
+	MaxMessagesPerMinute      int
+}
+
+func DefaultLimits() Limits {
+	return Limits{
+		MaxConnectionsPerDocument: defaultMaxRoomClients,
+		MaxConnections:            defaultMaxConnections,
+		MaxMessagesPerMinute:      defaultMessagesMinute,
+	}
+}
+
 type Hub struct {
-	mu         sync.RWMutex
-	rooms      map[string]*room
-	store      operationStore
-	authorizer access.Authorizer
+	mu                sync.RWMutex
+	rooms             map[string]*room
+	store             operationStore
+	authorizer        access.Authorizer
+	limits            Limits
+	activeConnections int
 }
 
 type room struct {
@@ -62,12 +83,14 @@ type operationStore interface {
 }
 
 type peer struct {
-	connection *websocket.Conn
-	room       string
-	replicaID  string
-	outbound   chan outboundMessage
-	stopped    chan struct{}
-	stopOnce   sync.Once
+	connection         *websocket.Conn
+	room               string
+	replicaID          string
+	outbound           chan outboundMessage
+	stopped            chan struct{}
+	stopOnce           sync.Once
+	messageWindowStart time.Time
+	messagesInWindow   int
 }
 
 type outboundMessage struct {
@@ -76,11 +99,20 @@ type outboundMessage struct {
 }
 
 func NewHub() *Hub {
-	return &Hub{rooms: make(map[string]*room)}
+	return NewHubWithLimits(nil, nil, DefaultLimits())
 }
 
 func NewHubWithServices(store operationStore, authorizer access.Authorizer) *Hub {
-	return &Hub{rooms: make(map[string]*room), store: store, authorizer: authorizer}
+	return NewHubWithLimits(store, authorizer, DefaultLimits())
+}
+
+func NewHubWithLimits(store operationStore, authorizer access.Authorizer, limits Limits) *Hub {
+	return &Hub{
+		rooms:      make(map[string]*room),
+		store:      store,
+		authorizer: authorizer,
+		limits:     limits,
+	}
 }
 
 var upgrader = websocket.Upgrader{
@@ -106,6 +138,12 @@ func checkSameHostOrigin(request *http.Request) bool {
 }
 
 func (hub *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
+	if !hub.acquireConnection() {
+		http.Error(w, "connection limit reached", http.StatusServiceUnavailable)
+		return
+	}
+	defer hub.releaseConnection()
+
 	connection, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
@@ -155,6 +193,11 @@ func (hub *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	go client.writePump(client.stopped)
 	if err := hub.addAndReplay(client, joined); err != nil {
+		if errors.Is(err, errRoomConnectionLimit) {
+			client.sendError("room_limit", "Document connection limit reached")
+			client.stop()
+			return
+		}
 		log.Printf("Unable to restore document %q: %v", client.room, err)
 		hub.writeErrorAndClose(connection, "storage_error", "Unable to restore document history")
 		client.stop()
@@ -172,6 +215,10 @@ func (hub *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	for {
 		messageType, raw, readErr := connection.ReadMessage()
 		if readErr != nil {
+			return
+		}
+		if !client.allowInbound(time.Now(), hub.limits.MaxMessagesPerMinute) {
+			client.sendError("rate_limited", "Message rate limit exceeded")
 			return
 		}
 		message, parseErr := protocol.ParseMessage(raw)
@@ -290,6 +337,9 @@ func (hub *Hub) addAndReplay(client *peer, joined []byte) error {
 		}
 		hub.rooms[client.room] = documentRoom
 	}
+	if len(documentRoom.peers) >= hub.limits.MaxConnectionsPerDocument {
+		return errRoomConnectionLimit
+	}
 	documentRoom.peers[client] = struct{}{}
 	for _, operation := range documentRoom.operations {
 		if !client.enqueue(operation) {
@@ -308,6 +358,34 @@ func (hub *Hub) addAndReplay(client *peer, joined []byte) error {
 		return nil
 	}
 	return nil
+}
+
+func (hub *Hub) acquireConnection() bool {
+	hub.mu.Lock()
+	defer hub.mu.Unlock()
+	if hub.activeConnections >= hub.limits.MaxConnections {
+		return false
+	}
+	hub.activeConnections++
+	return true
+}
+
+func (hub *Hub) releaseConnection() {
+	hub.mu.Lock()
+	hub.activeConnections--
+	hub.mu.Unlock()
+}
+
+func (client *peer) allowInbound(now time.Time, limit int) bool {
+	if client.messageWindowStart.IsZero() || now.Sub(client.messageWindowStart) >= inboundMessageWindow || now.Before(client.messageWindowStart) {
+		client.messageWindowStart = now
+		client.messagesInWindow = 0
+	}
+	if client.messagesInWindow >= limit {
+		return false
+	}
+	client.messagesInWindow++
+	return true
 }
 
 func (hub *Hub) remove(client *peer) {

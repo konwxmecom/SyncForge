@@ -195,6 +195,9 @@ Vite writes generated output under `apps/demo/dist/`. That output is a build art
 | `ADDR` | `127.0.0.1:8080` | Go HTTP and WebSocket listener |
 | `DATA_DIR` | `./data` | Owner-only durable operation log directory |
 | `AUTH_FILE` | required | Owner-only token-to-document allowlist; startup fails if unset |
+| `MAX_CONNECTIONS` | `256` | Maximum simultaneous WebSocket connections per process |
+| `MAX_CONNECTIONS_PER_DOCUMENT` | `32` | Maximum simultaneous connections to one document |
+| `MAX_MESSAGES_PER_MINUTE` | `600` | Maximum inbound messages per connection per minute |
 
 Useful endpoints and limits:
 
@@ -208,7 +211,7 @@ Useful endpoints and limits:
 
 Back up `DATA_DIR` with a consistent procedure, preferably with the service stopped. There is no automated backup or restore command. The history is append-only and checkpoints do not currently reduce disk use. A damaged complete record prevents the affected document from restoring; preserve a backup before attempting manual repair.
 
-The server binds to loopback by default, and the Docker stack publishes its ports on loopback only. For any network-facing environment, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. This repository does not provide TLS, rate limiting, global connection quotas, monitoring, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
+The server binds to loopback by default, and the Docker stack publishes its ports on loopback only. Connection and per-connection message ceilings are configurable safety limits, not tested capacity claims. For any network-facing environment, terminate TLS at a trusted reverse proxy, use `wss://`, restrict network access, and test the complete proxy/origin setup. This repository does not provide global disk/memory quotas, IP-based join rate limiting, monitoring, or an admin API. The service is single-process and must not be horizontally scaled with independent local data directories.
 
 ## 7. Tests and benchmark commands
 
@@ -253,6 +256,7 @@ The benchmark is reproducible in its workload, not guaranteed to produce identic
 | 5 — Browser demo | TipTap plain-text binding, connection status, invite link, multi-tab flow | Complete |
 | 6 — Alpha hardening | Durable server history, required room ACL, benchmark, alpha documentation | Complete |
 | 7 — Continuous verification | CI for tests, demo build, Go race checks, static analysis, and npm dependency audit | In progress |
+| 8 — Resource guardrails | Configurable process/document connection ceilings and per-connection message rate limit | In progress |
 
 ## 9. What remains
 
@@ -271,7 +275,7 @@ The initial alpha roadmap is complete; the work below is **future product and pr
 - Safe tombstone collection backed by replica membership, acknowledgements, and explicit offline-retention guarantees.
 - Log compaction and compact CRDT-state snapshots that reduce startup replay and disk usage.
 - Delta synchronization so reconnecting clients do not replay the full retained log.
-- Global disk/memory/connection quotas and request-rate limiting.
+- Global disk/memory quotas, IP-based join rate limiting, and capacity/load testing of the current connection and message ceilings.
 - Shared transactional persistence and coordination before running multiple server instances.
 - Load and soak testing before claiming support for large documents or high concurrency.
 

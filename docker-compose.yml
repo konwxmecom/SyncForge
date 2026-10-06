@@ -7,6 +7,9 @@ services:
       ADDR: "0.0.0.0:8080"
       DATA_DIR: "/data"
       AUTH_FILE: "/run/secrets/syncforge_auth.json"
+      MAX_CONNECTIONS: "${MAX_CONNECTIONS:-256}"
+      MAX_CONNECTIONS_PER_DOCUMENT: "${MAX_CONNECTIONS_PER_DOCUMENT:-32}"
+      MAX_MESSAGES_PER_MINUTE: "${MAX_MESSAGES_PER_MINUTE:-600}"
     volumes:
       - ./data:/data
       - ${AUTH_FILE:-./auth.local.json}:/run/secrets/syncforge_auth.json:ro

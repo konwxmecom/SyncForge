@@ -95,6 +95,9 @@ The server listens on `127.0.0.1:8080` by default. Configure it with environment
 | `ADDR` | `127.0.0.1:8080` | HTTP and WebSocket listen address; use a private interface behind a TLS-terminating proxy for deployments |
 | `DATA_DIR` | `./data` | Owner-only directory for durable logs and checkpoints |
 | `AUTH_FILE` | required | Owner-only JSON file containing token-to-document grants; the server refuses to start without it |
+| `MAX_CONNECTIONS` | `256` | Maximum simultaneous WebSocket connections per process |
+| `MAX_CONNECTIONS_PER_DOCUMENT` | `32` | Maximum simultaneous connections to one document |
+| `MAX_MESSAGES_PER_MINUTE` | `600` | Maximum inbound messages per connection per minute |
 
 A principal in the required authorization file has this shape:
 
@@ -127,7 +130,7 @@ The benchmark reports its runtime environment and workload, then checks that two
 
 - This is a single-process alpha service; there is no distributed coordination or multi-instance consistency.
 - Server logs are append-only, have no compaction, and need an external backup/restore process.
-- Per-document replay is capped at 10,000 operations or 32 MiB; there is no global disk, memory, connection, or request-rate quota.
+- Per-document replay is capped at 10,000 operations or 32 MiB. Configurable connection/message ceilings are initial safety limits, not capacity guarantees; there is no global disk or memory quota.
 - Tokens are shared bearer credentials loaded at startup; there are no user identities, token lifecycle APIs, or operation attribution.
 - The TipTap binding and demo are plain text. Rich-text semantics, selections and participant lists, version history, safe tombstone collection, and production operational guarantees are not implemented.
 
